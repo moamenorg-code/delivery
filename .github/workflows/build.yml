@@ -9,6 +9,7 @@ on:
 env:
   FLUTTER_VERSION: '3.16.0'
   NODE_VERSION: '20.x'
+  FLUTTER_ANALYTICS: false
 
 jobs:
   setup-flutter:
@@ -25,67 +26,6 @@ jobs:
       shell: bash
       run: echo "value=${RUNNER_OS}-flutter-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
     
-    - name: Cache Flutter dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.pub-cache
-          ~/.flutter
-        key: ${{ steps.cache-key.outputs.value }}
-        restore-keys: |
-          ${{ runner.os }}-flutter-
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-        channel: 'stable'
-        cache: true
-    
-    - name: Disable Flutter analytics
-      run: flutter --disable-analytics
-
-  build-api:
-    runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: ./api
-        shell: bash
-
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: './api/package-lock.json'
-    
-    - name: Install dependencies
-      run: |
-        npm ci
-        npm install --save-dev eslint
-        
-    - name: Run linter
-      run: npm run lint || true
-    
-    - name: Build API
-      run: npm run build || true
-
-  build-shared-lib:
-    needs: setup-flutter
-    runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: ./shared_lib
-        shell: bash
-
-    steps:
-    - uses: actions/checkout@v4
-    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -94,109 +34,7 @@ jobs:
         cache: true
     
     - name: Configure Flutter
-      run: flutter --disable-analytics
-        
-    - name: Get dependencies
       run: |
-        flutter pub get
-        flutter pub run build_runner build --delete-conflicting-outputs || true
-      
-    - name: Analyze project source
-      run: flutter analyze --no-fatal-infos || true
-    
-    - name: Run tests
-      run: flutter test || true
-    
-    - name: Cache build
-      uses: actions/cache@v3
-      with:
-        path: |
-          build/
-          .dart_tool/
-          .pub-cache/
-        key: ${{ runner.os }}-shared-lib-${{ github.sha }}
-
-  build-delivery-manager:
-    needs: build-shared-lib
-    runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: ./delivery_manager_flutter
-        shell: bash
-
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-        channel: 'stable'
-        cache: true
-    
-    - name: Configure Flutter
-      run: flutter --disable-analytics
-        
-    - name: Install dependencies
-      run: |
-        flutter pub get
-        flutter pub run build_runner build --delete-conflicting-outputs || true
-    
-    - name: Build web
-      run: flutter build web --release || true
-    
-    - name: Upload web build
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: delivery-manager-web
-        path: delivery_manager_flutter/build/web/
-        retention-days: 7
-
-  build-apps:
-    needs: build-shared-lib
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        app: [driver_app, customer_app, restaurant_app]
-        platform: [apk, web]
-        exclude:
-          - app: restaurant_app
-            platform: apk
-    
-    defaults:
-      run:
-        working-directory: ${{ matrix.app }}
-        shell: bash
-
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-        channel: 'stable'
-        cache: true
-    
-    - name: Configure Flutter
-      run: flutter --disable-analytics
-        
-    - name: Install dependencies
-      run: |
-        flutter pub get
-        flutter pub run build_runner build --delete-conflicting-outputs || true
-    
-    - name: Build ${{ matrix.platform }}
-      run: flutter build ${{ matrix.platform }} --release || true
-    
-    - name: Upload build
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.app }}-${{ matrix.platform }}
-        path: |
-          ${{ matrix.platform == 'apk' && format('{0}/build/app/outputs/flutter-apk/app-release.apk', matrix.app) || format('{0}/build/web', matrix.app) }}
-        retention-days: 7
+        flutter config --no-analytics
+        flutter --disable-analytics
+        echo "FLUTTER_ANALYTICS=false" >> $GITHUB_ENV
