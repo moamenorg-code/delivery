@@ -41,6 +41,9 @@ jobs:
         flutter-version: ${{ env.FLUTTER_VERSION }}
         channel: 'stable'
         cache: true
+    
+    - name: Disable Flutter analytics
+      run: flutter --disable-analytics
 
   build-api:
     runs-on: ubuntu-latest
@@ -89,6 +92,9 @@ jobs:
         flutter-version: ${{ env.FLUTTER_VERSION }}
         channel: 'stable'
         cache: true
+    
+    - name: Configure Flutter
+      run: flutter --disable-analytics
         
     - name: Get dependencies
       run: |
@@ -128,6 +134,9 @@ jobs:
         flutter-version: ${{ env.FLUTTER_VERSION }}
         channel: 'stable'
         cache: true
+    
+    - name: Configure Flutter
+      run: flutter --disable-analytics
         
     - name: Install dependencies
       run: |
@@ -171,6 +180,9 @@ jobs:
         flutter-version: ${{ env.FLUTTER_VERSION }}
         channel: 'stable'
         cache: true
+    
+    - name: Configure Flutter
+      run: flutter --disable-analytics
         
     - name: Install dependencies
       run: |
