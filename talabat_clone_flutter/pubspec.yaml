@@ -1,0 +1,30 @@
+name: talabat_clone_flutter
+description: A Flutter project for managing delivery operations similar to "طلبات".
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.0.0
+  firebase_auth: ^4.0.0
+  cloud_firestore: ^4.0.0
+  provider: ^6.0.0
+  http: ^0.14.0
+  google_maps_flutter: ^2.0.0
+  firebase_messaging: ^14.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
