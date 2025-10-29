@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "name": "OpenStreetMap Style",
+  "style": {
+    "version": 8,
+    "sources": {
+      "osm": {
+        "type": "vector",
+        "url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      }
+    },
+    "layers": [
+      {
+        "id": "background",
+        "type": "background",
+        "paint": {
+          "background-color": "#ffffff"
+        }
+      },
+      {
+        "id": "water",
+        "type": "fill",
+        "source": "osm",
+        "source-layer": "water",
+        "paint": {
+          "fill-color": "#a0c8e0"
+        }
+      },
+      {
+        "id": "land",
+        "type": "fill",
+        "source": "osm",
+        "source-layer": "land",
+        "paint": {
+          "fill-color": "#f0f0f0"
+        }
+      },
+      {
+        "id": "road",
+        "type": "line",
+        "source": "osm",
+        "source-layer": "road",
+        "paint": {
+          "line-color": "#cccccc",
+          "line-width": 2
+        }
+      },
+      {
+        "id": "building",
+        "type": "fill",
+        "source": "osm",
+        "source-layer": "building",
+        "paint": {
+          "fill-color": "#e0e0e0"
+        }
+      }
+    ]
+  }
+}

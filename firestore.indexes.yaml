@@ -1,0 +1,83 @@
+collections:
+  users:
+    fields:
+      id: string
+      name: string
+      email: string
+      phone: string
+      role: string
+      profileImage: string?
+      createdAt: timestamp
+      lastLoginAt: timestamp
+      status: string
+      preferences: map
+      
+  restaurants:
+    fields:
+      id: string
+      name: string
+      description: string
+      coverImage: string
+      logoImage: string
+      categories: array<string>
+      location: geopoint
+      rating: double
+      reviewsCount: integer
+      openingHours: map
+      isOpen: boolean
+      menu: subcollection
+        fields:
+          id: string
+          name: string
+          description: string
+          price: double
+          category: string
+          image: string
+          isAvailable: boolean
+          options: array<map>
+      
+  orders:
+    fields:
+      id: string
+      customerId: string
+      restaurantId: string
+      driverId: string?
+      items: array<map>
+      subtotal: double
+      deliveryFee: double
+      tax: double
+      total: double
+      status: string
+      paymentMethod: string
+      paymentStatus: string
+      deliveryAddress: map
+      createdAt: timestamp
+      updatedAt: timestamp
+      
+  drivers:
+    fields:
+      id: string
+      userId: string
+      vehicleType: string
+      vehiclePlateNumber: string
+      status: string
+      currentLocation: geopoint
+      rating: double
+      completedDeliveries: integer
+      earnings: subcollection
+        fields:
+          id: string
+          orderId: string
+          amount: double
+          date: timestamp
+          status: string
+      
+  transactions:
+    fields:
+      id: string
+      userId: string
+      type: string
+      amount: double
+      status: string
+      createdAt: timestamp
+      metadata: map

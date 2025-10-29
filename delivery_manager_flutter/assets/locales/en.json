@@ -1,0 +1,35 @@
+{
+  "app_title": "Delivery Management System",
+  "home": {
+    "title": "Home",
+    "current_orders": "Current Orders",
+    "no_orders": "No current orders available."
+  },
+  "map": {
+    "title": "Map",
+    "zoom_in": "Zoom In",
+    "zoom_out": "Zoom Out",
+    "drivers": "Drivers",
+    "deliveries": "Deliveries"
+  },
+  "delivery_details": {
+    "title": "Delivery Details",
+    "order_id": "Order ID",
+    "status": "Status",
+    "driver_info": "Driver Information",
+    "location": "Location"
+  },
+  "settings": {
+    "title": "Settings",
+    "account_settings": "Account Settings",
+    "notification_settings": "Notification Settings"
+  },
+  "notifications": {
+    "new_order": "You have a new order!",
+    "order_update": "Your order has been updated."
+  },
+  "errors": {
+    "network": "Network error. Please try again.",
+    "not_found": "Requested resource not found."
+  }
+}
