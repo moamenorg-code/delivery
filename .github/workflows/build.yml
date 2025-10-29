@@ -9,22 +9,14 @@ on:
 env:
   FLUTTER_VERSION: '3.16.0'
   NODE_VERSION: '20.x'
-  FLUTTER_ANALYTICS: false
 
 jobs:
-  setup-flutter:
-    name: Setup Flutter
+  build-shared-lib:
+    name: Build Shared Library
     runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache-key.outputs.value }}
     
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Generate cache key
-      id: cache-key
-      shell: bash
-      run: echo "value=${RUNNER_OS}-flutter-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
     
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -33,8 +25,163 @@ jobs:
         channel: 'stable'
         cache: true
     
-    - name: Configure Flutter
+    - name: Install dependencies
+      working-directory: ./shared_lib
       run: |
         flutter config --no-analytics
-        flutter --disable-analytics
-        echo "FLUTTER_ANALYTICS=false" >> $GITHUB_ENV
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs || true
+
+  build-delivery-manager:
+    name: Build Delivery Manager
+    needs: build-shared-lib
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+    
+    - name: Install dependencies
+      working-directory: ./delivery_manager_flutter
+      run: |
+        flutter config --no-analytics
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs || true
+    
+    - name: Build web
+      working-directory: ./delivery_manager_flutter
+      run: |
+        flutter build web --release --dart-define=FLUTTER_WEB_USE_SKIA=true
+    
+    - name: Upload web build
+      uses: actions/upload-artifact@v4
+      with:
+        name: delivery-manager-web
+        path: delivery_manager_flutter/build/web/
+
+  build-driver-app:
+    name: Build Driver App
+    needs: build-shared-lib
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+        
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Install dependencies
+      working-directory: ./driver_app
+      run: |
+        flutter config --no-analytics
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs || true
+    
+    - name: Build Android
+      working-directory: ./driver_app
+      run: |
+        flutter build apk --release --split-per-abi
+    
+    - name: Upload Android build
+      uses: actions/upload-artifact@v4
+      with:
+        name: driver-app-android
+        path: |
+          driver_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          driver_app/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+
+  build-customer-app:
+    name: Build Customer App
+    needs: build-shared-lib
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+        
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Install dependencies
+      working-directory: ./customer_app
+      run: |
+        flutter config --no-analytics
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs || true
+    
+    - name: Build Android
+      working-directory: ./customer_app
+      run: |
+        flutter build apk --release --split-per-abi
+        
+    - name: Build web
+      working-directory: ./customer_app
+      run: |
+        flutter build web --release --dart-define=FLUTTER_WEB_USE_SKIA=true
+    
+    - name: Upload builds
+      uses: actions/upload-artifact@v4
+      with:
+        name: customer-app-builds
+        path: |
+          customer_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          customer_app/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+          customer_app/build/web/
+
+  build-restaurant-app:
+    name: Build Restaurant App
+    needs: build-shared-lib
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+    
+    - name: Install dependencies
+      working-directory: ./restaurant_app
+      run: |
+        flutter config --no-analytics
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs || true
+    
+    - name: Build web
+      working-directory: ./restaurant_app
+      run: |
+        flutter build web --release --dart-define=FLUTTER_WEB_USE_SKIA=true
+    
+    - name: Upload web build
+      uses: actions/upload-artifact@v4
+      with:
+        name: restaurant-app-web
+        path: restaurant_app/build/web/
